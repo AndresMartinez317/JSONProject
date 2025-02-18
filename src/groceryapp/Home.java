@@ -4,22 +4,14 @@ import com.github.cliftonlabs.json_simple.JsonArray;
 import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
-import groceryapp.Product;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 
 
@@ -44,14 +36,12 @@ public final class Home extends javax.swing.JFrame {
     
     public void fillTable() throws FileNotFoundException, IOException, ClassNotFoundException, JsonException{
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        
         model.setRowCount(0);
         ArrayList<Product> list = new ArrayList<>();
         JsonArray ja = null;
         try(FileReader fr = new FileReader("Database.json")){
-           // JsonObject jo = (JsonObject) Jsoner.deserialize(fr);
              ja = (JsonArray) Jsoner.deserializeMany(fr);
-            //String name = (String) jo.get("name");
-            //int quantity = (Integer) jo.get("quantity");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -60,13 +50,10 @@ public final class Home extends javax.swing.JFrame {
             Product p = Product.fromjsonobject(jo);
             list.add(p);
         }
-        Object rowdata[] = new Object[2];
         for(int i =0;i<list.size();i++){
-            rowdata[0] = list.get(i).name;
-            rowdata[1] = list.get(i).quantity;
-            model.addRow(rowdata);
+            model.addRow(new Object[]{list.get(i).name, list.get(i).quantity,new TableButton()});
         }
-        
+        jTable1.setDefaultRenderer(Object.class, new ButtonRenderer());
     }
 
     /**
@@ -95,13 +82,14 @@ public final class Home extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, true
+                false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
+        jTable1.setRowHeight(40);
         jScrollPane1.setViewportView(jTable1);
 
         jButton1.setText("Agregar");
